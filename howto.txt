@@ -1,0 +1,7 @@
+How to Use Governance 1.0
+
+- Deploy contracts with 'bash scripts/deploy.sh'
+- Use CLI for proposals and voting
+- Review docs/ for module specs and use cases
+- Run tests with 'move test ./tests'
+- Customize parameters in config/parameters.toml

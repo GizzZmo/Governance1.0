@@ -1,0 +1,11 @@
+Governance 1.0 Architecture Visual Aids
+
+- [Governance Module] <-> [Delegation Staking Module]
+- [Governance Module] <-> [Treasury Module]
+- [Governance Module] <-> [DAO Token Module]
+- [Governance Module] <-> [Proposal Handler Module]
+- [Tests] <-> [All modules]
+- [Scripts] <-> [Contracts]
+- [Docs] <-> [All modules]
+
+See docs/ for detailed specs and diagrams.

@@ -1,0 +1,11 @@
+# Example parameters for Governance 1.0
+
+[governance]
+min_quorum_percentage = 10
+proposal_types = ["general", "parameter_change", "upgrade"]
+
+[staking]
+min_stake = 1000
+
+[treasury]
+required_approvals = 2
