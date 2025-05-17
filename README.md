@@ -101,10 +101,7 @@ Sources and related content
 /** now, source code to all the files /**
 
 
-Coding partner
-Code snippet
-
-module Governance {
+# module Governance {
     struct Proposal {
         id: u64,
         creator: address,
@@ -175,9 +172,7 @@ module Governance {
     native fun generate_id(): u64;
     native fun total_stake(): u128;
 }
-Code snippet
-
-module DelegationStaking {
+# module DelegationStaking {
     struct Validator {
         address: address,
         stake: u128,
@@ -221,9 +216,7 @@ module DelegationStaking {
 
     native fun current_time(): u64;
 }
-Code snippet
-
-module Treasury {
+# module Treasury {
     struct Balance {
         value: u128,
     }
@@ -278,8 +271,6 @@ module Treasury {
         // Optionally, mark the proposal as executed
     }
 }
-Code snippet
-
 module ProposalHandler {
     // This module would contain logic to handle the execution of different proposal types.
     // For example, upgrading contracts, modifying parameters, etc.
@@ -299,9 +290,7 @@ module ProposalHandler {
     native fun log(message: string, proposal_id: u64, address: address);
     native fun log(message: string, proposal_id: u64, parameter_name: string, new_value: u64);
 }
-Code snippet
-
-#[test_only]
+# [test_only]
 module GovernanceTests {
     use std::signer;
     use sui::object::{Self, UID};
