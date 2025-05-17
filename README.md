@@ -1,6 +1,4 @@
 # Governance 1.0
-Based on the content of the uploaded files, here's some text you could use for your GitHub repository:
-
 ```
 # Governance System Enhancement Strategy
 
@@ -40,7 +38,7 @@ Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribut
 Security is a top priority. Please review our [SECURITY.md](SECURITY.md) for details on our security practices and how to report vulnerabilities.
 ```
 
-A modular Move-based decentralized governance protocol for DAOs, validator sets, and on-chain treasuries.
+# A modular Move-based decentralized governance protocol for DAOs, validator sets, and on-chain treasuries.
 
 ## Quick Start
 
