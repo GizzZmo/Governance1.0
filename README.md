@@ -549,9 +549,7 @@ We will add checks at the beginning of our public functions to enforce these ver
 
 Here's how we can enhance some of the existing functions with verification:
 
-Governance Module (governance.rs):
-
-Code snippet
+# Governance Module (governance.rs):
 
 module Governance {
     // ... (struct definitions)
@@ -591,9 +589,9 @@ module Governance {
     // Example constant for a governance admin address
     const GOVERNANCE_ADMIN: address = @0x123; // Replace with the actual admin address
 }
-DelegationStaking Module (delegation-staking.rs):
 
-Code snippet
+
+# DelegationStaking Module (delegation-staking.rs):
 
 module DelegationStaking {
     // ... (struct definitions)
@@ -630,9 +628,9 @@ module DelegationStaking {
     // ... (struct definitions and constants)
     const GOVERNANCE_ADMIN: address = @0x123; // Replace with the actual admin address
 }
-Treasury Module (treasury.rs):
 
-Code snippet
+
+# Treasury Module (treasury.rs):
 
 module Treasury {
     // ... (struct definitions)
@@ -678,7 +676,8 @@ module Treasury {
     const GOVERNANCE_ADMIN: address = @0x123; // Replace with the actual admin address
     const TREASURY_MANAGER: address = @0x456; // Replace with the actual treasury manager address
 }
-4. Testing the Verification:
+
+# 4. Testing the Verification:
 
 We will need to add more comprehensive tests in our *_tests.rs files to ensure that these assert! conditions are correctly enforced. Tests should cover both valid and invalid inputs to verify that the functions behave as expected and that unauthorized actions are rejected.
 
