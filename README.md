@@ -60,43 +60,43 @@ Here are the source files from the repository, organized by type:
 
 Move Files (.rs)
 
-contracts/governance.rs
-contracts/delegation-staking.rs
-contracts/treasury.rs
-contracts/proposal-handler.rs
-tests/governance-tests.rs
-tests/staking-tests.rs
-tests/treasury-tests.rs
-scripts/governance-cli.rs
-Shell Scripts (.sh)
+contracts/governance.rs 
+contracts/delegation-staking.rs 
+contracts/treasury.rs 
+contracts/proposal-handler.rs 
+tests/governance-tests.rs 
+tests/staking-tests.rs 
+tests/treasury-tests.rs 
+scripts/governance-cli.rs 
+Shell Scripts (.sh) 
 
-scripts/deploy.sh
-deploy.sh
-Markdown Files (.md)
+scripts/deploy.sh 
+deploy.sh 
+Markdown Files (.md) 
 
-docs/use_cases.md
-docs/README.md
-docs/governance-specs.md
-docs/staking-mechanics.md
-README.md
-SECURITY.md
-CONTRIBUTING.md
-YAML Files (.yml)
+docs/use_cases.md 
+docs/README.md 
+docs/governance-specs.md 
+docs/staking-mechanics.md 
+README.md 
+SECURITY.md 
+CONTRIBUTING.md 
+YAML Files (.yml) 
 
-.github/workflows/ci-deploy.yml
-.github/workflows/ci-cd.yml
-TOML Files (.toml)
+.github/workflows/ci-deploy.yml 
+.github/workflows/ci-cd.yml 
+TOML Files (.toml) 
 
-config/parameters.toml
-Text Files (.txt)
+config/parameters.toml 
+Text Files (.txt) 
 
-howto.txt
-VisualAidsforGovernanceArchitecture.txt
-
-Sources and related content
+howto.txt 
+VisualAidsforGovernanceArchitecture.txt 
 
 
 
+
+# Sources and related content
 
 /** now, source code to all the files /**
 
