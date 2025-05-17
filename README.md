@@ -99,8 +99,7 @@ VisualAidsforGovernanceArchitecture.txt
 
 /** now, source code to all the files /**
 
-
-# module Governance {
+    module Governance {
     struct Proposal {
         id: u64,
         creator: address,
@@ -171,7 +170,8 @@ VisualAidsforGovernanceArchitecture.txt
     native fun generate_id(): u64;
     native fun total_stake(): u128;
 }
-# module DelegationStaking {
+
+    module DelegationStaking {
     struct Validator {
         address: address,
         stake: u128,
@@ -215,7 +215,8 @@ VisualAidsforGovernanceArchitecture.txt
 
     native fun current_time(): u64;
 }
-# module Treasury {
+
+    module Treasury {
     struct Balance {
         value: u128,
     }
@@ -270,7 +271,7 @@ VisualAidsforGovernanceArchitecture.txt
         // Optionally, mark the proposal as executed
     }
 }
-# module ProposalHandler {
+    module ProposalHandler {
     // This module would contain logic to handle the execution of different proposal types.
     // For example, upgrading contracts, modifying parameters, etc.
 
@@ -290,7 +291,7 @@ VisualAidsforGovernanceArchitecture.txt
     native fun log(message: string, proposal_id: u64, parameter_name: string, new_value: u64);
 }
 # [test_only]
-module GovernanceTests {
+    module GovernanceTests {
     use std::signer;
     use sui::object::{Self, UID};
     use sui::tx_context::{Self, TxContext};
@@ -370,7 +371,7 @@ module GovernanceTests {
 }
 
 # [test_only]
-# module StakingTests {
+    module StakingTests {
     use std::signer;
     use sui::object::{Self, UID};
     use sui::tx_context::{Self, TxContext};
@@ -520,20 +521,22 @@ Here's a potential approach, focusing on the entry points of our contracts:
 The primary entry points in our current contracts are the public functions:
 
 Governance module:
-submit_proposal
-hybrid_vote
-execute_proposal
-DelegationStaking module:
-initialize
-delegate_stake
-update_reputation
-record_heartbeat
+    submit_proposal
+    hybrid_vote
+    execute_proposal
+    DelegationStaking module:
+    initialize
+    delegate_stake
+    update_reputation
+    record_heartbeat
+
 Treasury module:
-initialize
-deposit
-submit_withdrawal_proposal
-approve_withdrawal
-execute_withdrawal
+    initialize
+    deposit
+    submit_withdrawal_proposal
+    approve_withdrawal
+    execute_withdrawal
+
 2. Define Verification Needs:
 
 For each entry point, we should consider what needs to be verified to ensure the integrity and security of our governance system. This might include:
@@ -550,7 +553,7 @@ Here's how we can enhance some of the existing functions with verification:
 
 # Governance Module (governance.rs):
 
-module Governance {
+    module Governance {
     // ... (struct definitions)
 
     public fun submit_proposal(creator: &signer, description: string, proposal_type: u8): u64 {
@@ -592,7 +595,7 @@ module Governance {
 
 # DelegationStaking Module (delegation-staking.rs):
 
-module DelegationStaking {
+    module DelegationStaking {
     // ... (struct definitions)
 
     public fun initialize(account: &signer) {
@@ -631,7 +634,7 @@ module DelegationStaking {
 
 # Treasury Module (treasury.rs):
 
-module Treasury {
+    module Treasury {
     // ... (struct definitions)
 
     public fun initialize(account: &signer, initial_balance: u128) {
@@ -680,9 +683,16 @@ module Treasury {
 
 We will need to add more comprehensive tests in our *_tests.rs files to ensure that these assert! conditions are correctly enforced. Tests should cover both valid and invalid inputs to verify that the functions behave as expected and that unauthorized actions are rejected.
 
-Next Steps:
+# Next Steps:
 
 Go through each public function in all our Move contracts.
-Identify the necessary verification checks for each function. Consider authentication, authorization, data validation, and state invariants.
-Implement these checks using assert! statements at the beginning of each function.
-Add or modify tests in the tests/ directory to specifically test these verification rules. Ensure that tests cover scenarios that should pass and scenarios that should fail due to verification errors.
+
+1.Identify the necessary verification checks for each function.
+
+2.Consider authentication, authorization, data validation, and state invariants.
+
+3.Implement these checks using assert! statements at the beginning of each function.
+
+4.Add or modify tests in the tests/ directory to specifically test these verification rules. 
+
+5.Ensure that tests cover scenarios that should pass and scenarios that should fail due to verification errors.
