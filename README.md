@@ -1,7 +1,7 @@
-/** # Governance1.0
- let's implement all three enhancements:
+# Governance1.0
 
 Refine Validator Reputation Scoring
+
 Add DAO Integration
 Implement Treasury AI Audits
 Since these are substantial features, let's break them down into smaller, manageable tasks.
