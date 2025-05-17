@@ -1,99 +1,99 @@
 # Governance 1.0
 
-Refine Validator Reputation Scoring
-
-Add DAO Integration
-
-Implement Treasury AI Audits
-
-Since these are substantial features, let's break them down into smaller, manageable tasks.
+    Refine Validator Reputation Scoring
+    
+    Add DAO Integration
+    
+    Implement Treasury AI Audits
+    
+    Since these are substantial features, let's break them down into smaller, manageable tasks.
 
 
 # 1. Refine Validator Reputation Scoring
 
-Task 1.1: Analyze the existing hybrid_vote function in governance.rs to understand the current reputation weighting.
-Task 1.2: Design a more comprehensive reputation scoring system. Consider factors like:
-Validator uptime/downtime.
-Proposal participation.
-Successful proposal submissions.
-Any evidence of malicious behavior.
-Task 1.3: Modify the delegation-staking.rs contract to store and update validator reputation scores based on the new design.
-Task 1.4: Update the hybrid_vote function in governance.rs to incorporate the new reputation scores from delegation-staking.rs when calculating voting weight.
-Task 1.5: Add tests in staking-tests.rs and governance-tests.rs to ensure the reputation scoring and voting weight calculations work correctly.
+    Task 1.1: Analyze the existing hybrid_vote function in governance.rs to understand the current reputation weighting.
+    Task 1.2: Design a more comprehensive reputation scoring system. Consider factors like:
+    Validator uptime/downtime.
+    Proposal participation.
+    Successful proposal submissions.
+    Any evidence of malicious behavior.
+    Task 1.3: Modify the delegation-staking.rs contract to store and update validator reputation scores based on the new design.
+    Task 1.4: Update the hybrid_vote function in governance.rs to incorporate the new reputation scores from delegation-staking.rs when calculating voting weight.
+    Task 1.5: Add tests in staking-tests.rs and governance-tests.rs to ensure the reputation scoring and voting weight calculations work correctly.
 
 # 2. Add DAO Integration
 
-Task 2.1: Design the structure for governance tokens. Determine the token's properties (e.g., name, symbol, total supply, divisibility).
-Task 2.2: Create a new Move contract (e.g., governance_token.rs) to manage the governance tokens. This contract should include functions for:
-Minting tokens.
-Transferring tokens.
-Potentially staking tokens for governance participation.
-Task 2.3: Modify the governance.rs contract to:
-Allow proposals to be submitted by token holders.
-Require a minimum number of tokens to submit a proposal.
-Weight votes based on the number of tokens held.
-Task 2.4: Update the deploy.sh script to deploy the governance_token.rs contract.
-Task 2.5: Add tests in governance-tests.rs to verify the DAO integration, including token-weighted voting and proposal submission requirements.
+    Task 2.1: Design the structure for governance tokens. Determine the token's properties (e.g., name, symbol, total supply, divisibility).
+    Task 2.2: Create a new Move contract (e.g., governance_token.rs) to manage the governance tokens. This contract should include functions for:
+    Minting tokens.
+    Transferring tokens.
+    Potentially staking tokens for governance participation.
+    Task 2.3: Modify the governance.rs contract to:
+    Allow proposals to be submitted by token holders.
+    Require a minimum number of tokens to submit a proposal.
+    Weight votes based on the number of tokens held.
+    Task 2.4: Update the deploy.sh script to deploy the governance_token.rs contract.
+    Task 2.5: Add tests in governance-tests.rs to verify the DAO integration, including token-weighted voting and proposal submission requirements.
 
 # 3. Implement Treasury AI Audits
 
-Task 3.1: Define the criteria for AI audits of funding proposals. This might include:
-Analyzing the requested funding amount.
-Evaluating the proposal's budget allocation.
-Assessing the proposer's reputation or track record.
-Identifying potential risks or conflicts of interest.
-Task 3.2: Research and choose an appropriate AI model or library that can be integrated with the Move contracts. Consider factors such as:
-Compatibility with the Move environment.
-Computational cost.
-Accuracy and reliability.
-Task 3.3: Create a mechanism to feed proposal data to the AI model. This might involve:
-Storing proposal data in a format that the AI model can process.
-Creating functions to extract relevant data from the governance.rs contract.
-Task 3.4: Implement a function in governance.rs or proposal-handler.rs to call the AI audit and incorporate its results into the proposal evaluation process. This could involve:
-Providing an AI audit score or risk assessment.
-Flagging proposals that require further review.
-Task 3.5: Add tests to ensure the AI audit integration works correctly and that the audit results are properly considered in the governance process.
-This is a comprehensive plan. Let me know if you'd like to start with a specific task or if you have any questions about the proposed implementation.
-
+    Task 3.1: Define the criteria for AI audits of funding proposals. This might include:
+    Analyzing the requested funding amount.
+    Evaluating the proposal's budget allocation.
+    Assessing the proposer's reputation or track record.
+    Identifying potential risks or conflicts of interest.
+    Task 3.2: Research and choose an appropriate AI model or library that can be integrated with the Move contracts. Consider factors such as:
+    Compatibility with the Move environment.
+    Computational cost.
+    Accuracy and reliability.
+    Task 3.3: Create a mechanism to feed proposal data to the AI model. This might involve:
+    Storing proposal data in a format that the AI model can process.
+    Creating functions to extract relevant data from the governance.rs contract.
+    Task 3.4: Implement a function in governance.rs or proposal-handler.rs to call the AI audit and incorporate its results into the proposal evaluation process. This could involve:
+    Providing an AI audit score or risk assessment.
+    Flagging proposals that require further review.
+    Task 3.5: Add tests to ensure the AI audit integration works correctly and that the audit results are properly considered in the governance process.
+    This is a comprehensive plan. Let me know if you'd like to start with a specific task or if you have any questions about the proposed implementation.
+    
 
 # Sources and related content
 
-Analysis
-Here are the source files from the repository, organized by type:
-
-# Move Files (.rs)
-contracts/governance.rs 
-contracts/delegation-staking.rs 
-contracts/treasury.rs 
-contracts/proposal-handler.rs 
-tests/governance-tests.rs 
-tests/staking-tests.rs 
-tests/treasury-tests.rs 
-scripts/governance-cli.rs 
-
-# Shell Scripts (.sh) 
-scripts/deploy.sh 
-deploy.sh 
-
-# Markdown Files (.md) 
-docs/use_cases.md 
-docs/README.md 
-docs/governance-specs.md 
-docs/staking-mechanics.md 
-README.md 
-SECURITY.md 
-CONTRIBUTING.md 
-
-# YAML Files (.yml) 
-.github/workflows/ci-deploy.yml 
-.github/workflows/ci-cd.yml 
-
-# TOML Files (.toml) 
-config/parameters.toml 
-
-# Text Files (.txt) 
-howto.txt 
-VisualAidsforGovernanceArchitecture.txt 
+    Analysis
+    Here are the source files from the repository, organized by type:
+    
+    # Move Files (.rs)
+    contracts/governance.rs 
+    contracts/delegation-staking.rs 
+    contracts/treasury.rs 
+    contracts/proposal-handler.rs 
+    tests/governance-tests.rs 
+    tests/staking-tests.rs 
+    tests/treasury-tests.rs 
+    scripts/governance-cli.rs 
+    
+    # Shell Scripts (.sh) 
+    scripts/deploy.sh 
+    deploy.sh 
+    
+    # Markdown Files (.md) 
+    docs/use_cases.md 
+    docs/README.md 
+    docs/governance-specs.md 
+    docs/staking-mechanics.md 
+    README.md 
+    SECURITY.md 
+    CONTRIBUTING.md 
+    
+    # YAML Files (.yml) 
+    .github/workflows/ci-deploy.yml 
+    .github/workflows/ci-cd.yml 
+    
+    # TOML Files (.toml) 
+    config/parameters.toml 
+    
+    # Text Files (.txt) 
+    howto.txt 
+    VisualAidsforGovernanceArchitecture.txt 
 
 
 
