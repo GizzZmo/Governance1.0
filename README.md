@@ -742,3 +742,382 @@ Go through each public function in all our Move contracts.
 4.Add or modify tests in the tests/ directory to specifically test these verification rules. 
 
 5.Ensure that tests cover scenarios that should pass and scenarios that should fail due to verification errors.
+
+Okay, let's implement these verification checks by adding assert! statements to the beginning of each public function in our Move contracts. We'll also define the GOVERNANCE_ADMIN and TREASURY_MANAGER constants where needed.
+
+Here's the updated code for each module:
+
+1. contracts/governance_token.rs
+
+Code snippet
+
+    module governance_token {
+    use sui::object::{Self, UID};
+    use sui::transfer;
+    use sui::tx_context::{Self, TxContext};
+
+    // Represents the metadata of the Governance Token
+    struct TokenMetadata has key {
+        id: UID,
+        name: String,
+        symbol: String,
+        total_supply: u128,
+        decimals: u8,
+    }
+
+    // Represents the balance of a user
+    struct Balance has key {
+        id: UID,
+        owner: address,
+        value: u128,
+    }
+
+    // Capability to mint new tokens (initially held by the module owner)
+    struct MintCapability has key {
+        id: UID,
+    }
+
+    const TOKEN_NAME: String = string::from_utf8(b"Governance Token");
+    const TOKEN_SYMBOL: String = string::from_utf8(b"GOV");
+    const TOKEN_DECIMALS: u8 = 8;
+    const TOTAL_SUPPLY: u128 = 1000000000 * (10 as u128).pow(TOKEN_DECIMALS as u64); // 1 billion with 8 decimals
+
+    // Initialize the token metadata and mint the initial supply to the module creator
+    public fun initialize(ctx: &mut TxContext) {
+        let module_address = tx_context::sender(ctx);
+        assert!(!exists<TokenMetadata>(module_address), "Token already initialized");
+
+        let metadata = TokenMetadata {
+            id: object::new(ctx),
+            name: TOKEN_NAME,
+            symbol: TOKEN_SYMBOL,
+            total_supply: TOTAL_SUPPLY,
+            decimals: TOKEN_DECIMALS,
+        };
+        move_to(ctx, metadata);
+
+        let mint_cap = MintCapability { id: object::new(ctx) };
+        move_to(ctx, mint_cap);
+
+        // Mint the initial total supply to the module creator
+        let initial_balance = Balance {
+            id: object::new(ctx),
+            owner: module_address,
+            value: TOTAL_SUPPLY,
+        };
+        move_to(ctx, initial_balance);
+    }
+
+    // Mint new tokens (only callable by the entity holding the MintCapability)
+    public fun mint(
+        _cap: &MintCapability,
+        recipient: address,
+        amount: u128,
+        ctx: &mut TxContext,
+    ) {
+        assert!(exists<TokenMetadata>(tx_context::sender(ctx)), "Token not initialized");
+        let metadata = borrow_global<TokenMetadata>(tx_context::sender(ctx));
+        assert!(amount > 0, "Mint amount must be positive");
+        assert!(balance_of(recipient, ctx) + amount <= metadata.total_supply, "Total supply exceeded");
+
+        let recipient_balance = balance_object_mut(recipient, ctx);
+        if (option::is_some(&recipient_balance)) {
+            option::borrow_mut(&mut recipient_balance).value = option::borrow(&recipient_balance).value + amount;
+        } else {
+            let new_balance = Balance {
+                id: object::new(ctx),
+                owner: recipient,
+                value: amount,
+            };
+            move_to(ctx, new_balance);
+        };
+    }
+
+    // Transfer tokens from sender to recipient
+    public fun transfer(from: &signer, recipient: address, amount: u128, ctx: &mut TxContext) {
+        let sender_address = signer::address(from);
+        assert!(amount > 0, "Transfer amount must be positive");
+        assert!(sender_address != recipient, "Cannot transfer to yourself");
+        assert!(balance(sender_address, ctx) >= amount, "Insufficient balance");
+
+        let sender_balance_object = balance_object_mut(sender_address, ctx);
+        option::borrow_mut(&mut sender_balance_object).value = sender_balance - amount;
+
+        let recipient_balance = balance_object_mut(recipient, ctx);
+        if (option::is_some(&recipient_balance)) {
+            option::borrow_mut(&mut recipient_balance).value = option::borrow(&recipient_balance).value + amount;
+        } else {
+            let new_balance = Balance {
+                id: object::new(ctx),
+                owner: recipient,
+                value: amount,
+            };
+            move_to(ctx, new_balance);
+        };
+    }
+
+    // Get the balance of an address
+    public fun balance(owner: address, ctx: &TxContext): u128 {
+        let balance_object = balance_object(owner, ctx);
+        if (option::is_some(&balance_object)) {
+            option::borrow(&balance_object).value
+        } else {
+            0
+        }
+    }
+
+    fun balance_object(owner: address, ctx: &TxContext): Option<&Balance> {
+        sui::object::borrow_object<Balance>(object::address_to_object_id(owner), ctx)
+    }
+
+    fun balance_object_mut(owner: address, ctx: &mut TxContext): Option<&mut Balance> {
+        sui::object::borrow_object_mut<Balance>(object::address_to_object_id(owner), ctx)
+    }
+
+    // Get the total supply of the token
+    public fun total_supply(ctx: &TxContext): u128 {
+        assert!(exists<TokenMetadata>(tx_context::sender(ctx)), "Token not initialized");
+        borrow_global<TokenMetadata>(tx_context::sender(ctx)).total_supply
+    }
+
+    // Get the number of decimals of the token
+    public fun decimals(ctx: &TxContext): u8 {
+        assert!(exists<TokenMetadata>(tx_context::sender(ctx)), "Token not initialized");
+        borrow_global<TokenMetadata>(tx_context::sender(ctx)).decimals
+    }
+
+    // Get the symbol of the token
+    public fun symbol(ctx: &TxContext): String {
+        assert!(exists<TokenMetadata>(tx_context::sender(ctx)), "Token not initialized");
+        borrow_global<TokenMetadata>(tx_context::sender(ctx)).symbol
+    }
+
+    // Get the name of the token
+    public fun name(ctx: &TxContext): String {
+        assert!(exists<TokenMetadata>(tx_context::sender(ctx)), "Token not initialized");
+        borrow_global<TokenMetadata>(tx_context::sender(ctx)).name
+    }
+    }
+2. contracts/governance.rs
+
+Code snippet
+
+    module Governance {
+    struct Proposal {
+        id: u64,
+        creator: address,
+        description: string,
+        proposal_type: u8,
+        votes_for: u128,
+        votes_against: u128,
+        veto_votes: u128,
+        quorum: u128,
+        executed: bool,
+    }
+
+    struct Voter {
+        address: address,
+        stake: u128,
+        delegate: option<address>,
+        reputation: u128,
+    }
+
+    const GOVERNANCE_ADMIN: address = @0x123; // Replace with actual admin address
+
+    public fun submit_proposal(creator: &signer, description: string, proposal_type: u8): u64 {
+        assert!(string::length(&description) > 0, "Proposal description cannot be empty");
+        assert!(proposal_type < 3, "Invalid proposal type");
+        let proposal_id = generate_id();
+        let quorum = determine_quorum(proposal_type);
+        let new_proposal = Proposal { id: proposal_id, creator: signer::address(creator), description, proposal_type, votes_for: 0, votes_against: 0, veto_votes: 0, quorum, executed: false };
+        move_to(creator, new_proposal);
+        return proposal_id;
+    }
+
+    public fun hybrid_vote(proposal: &mut Proposal, voter_address: address, votes: u128, support: bool, veto: bool) {
+        assert!(exists<Voter>(voter_address), "Voter not registered");
+        let voter = borrow_global<Voter>(voter_address);
+        assert!(voter.stake >= votes, "Insufficient stake to cast these many votes");
+        assert!(!proposal.executed, "Proposal has already been executed");
+
+        let effective_votes = sqrt(votes);
+        let reputation_weight = 100 + voter.reputation / 100;
+        let final_votes = effective_votes * reputation_weight / 100;
+
+        let voting_address = voter.delegate.unwrap_or(voter_address);
+        // assert!(voter.stake >= votes, "Insufficient stake"); // Already checked above
+
+        if veto && proposal.proposal_type == 2 {
+            proposal.veto_votes += final_votes;
+        } else if support {
+            proposal.votes_for += final_votes;
+        } else {
+            proposal.votes_against += final_votes;
+        }
+    }
+
+    public fun execute_proposal(account: &signer, proposal: &mut Proposal) {
+        assert!(signer::address(account) == GOVERNANCE_ADMIN, "Only the governance admin can execute proposals");
+        assert!(proposal.votes_for + proposal.votes_against >= proposal.quorum, "Quorum not met");
+        assert!(proposal.votes_for > proposal.votes_against, "Proposal rejected");
+        assert!(!proposal.executed, "Proposal has already been executed");
+        proposal.executed = true;
+    }
+
+    fun determine_quorum(proposal_type: u8) -> u128 {
+        assert!(proposal_type < 3, "Invalid proposal type");
+        match proposal_type {
+            0 => total_stake * 10 / 100,
+            1 => total_stake * 30 / 100,
+            2 => total_stake * 50 / 100,
+            _ => abort("Invalid proposal type"),
+        }
+    }
+
+    fun sqrt(x: u128) -> u128 {
+        let mut guess = x / 2;
+        while guess * guess > x {
+            guess = (guess + x / guess) / 2;
+        }
+        guess
+    }
+
+    native fun generate_id(): u64;
+    native fun total_stake(): u128;
+    }
+3. contracts/delegation-staking.rs
+
+Code snippet
+
+    module DelegationStaking {
+    struct Validator {
+        address: address,
+        stake: u128,
+        delegated_stake: u128,
+        reputation: u128,
+        last_heartbeat: u64,
+    }
+
+    struct Config has key {
+        min_stake: u64,
+    }
+
+    const GOVERNANCE_ADMIN: address = @0x123; // Replace with actual admin address
+
+    public fun initialize(account: &signer) {
+        assert!(signer::address(account) == GOVERNANCE_ADMIN, "Only the governance admin can initialize this module");
+        assert!(!exists<Config>(@0x0), "Module already initialized"); // Assuming config is stored under module address 0x0
+        move_to(account, Config { min_stake: 1000 });
+    }
+
+    public fun delegate_stake(delegator: &signer, validator_address: address, amount: u64) {
+        assert!(exists<Config>(@0x0), "Module not initialized");
+        assert!(amount >= borrow_global<Config>(@0x0).min_stake, "Staking amount below minimum");
+        assert!(exists<Validator>(validator_address), "Validator address is not valid");
+        assert!(signer::address(delegator) != validator_address, "Cannot delegate to yourself");
+        // Logic to transfer stake and update validator record (implementation details depend on the framework)
+        // ...
+    }
+
+    public fun update_reputation(caller: &signer, validator_address: address, reputation_change: i64) {
+        assert!(signer::address(caller) == GOVERNANCE_ADMIN, "Only the governance admin can update reputation");
+        assert!(exists<Validator>(validator_address), "Validator not found");
+        // Implement logic to update reputation, potentially with bounds
+        if (exists<Validator>(validator_address)) {
+            let validator = borrow_global_mut<Validator>(validator_address);
+            validator.reputation = (validator.reputation as i64 + reputation_change) as u128;
+        }
+    }
+
+    public fun record_heartbeat(validator_signer: &signer, validator_address: address) {
+        assert!(signer::address(validator_signer) == validator_address, "Only the validator can record their own heartbeat");
+        assert!(exists<Validator>(validator_address), "Validator not found");
+        if (exists<Validator>(validator_address)) {
+            let validator = borrow_global_mut<Validator>(validator_address);
+            validator.last_heartbeat = current_time(); // Assuming 'current_time()' is a native function
+        }
+    }
+
+    native fun current_time(): u64;
+    }
+4. contracts/treasury.rs
+
+Code snippet
+
+    module Treasury {
+    struct Balance {
+        value: u128,
+    }
+
+    struct Approval {
+        proposal_id: u64,
+        amount: u128,
+        approver: address,
+    }
+
+    const GOVERNANCE_ADMIN: address = @0x123; // Replace with actual admin address
+    const TREASURY_MANAGER: address = @0x456; // Replace with actual treasury manager address
+
+    public fun initialize(account: &signer, initial_balance: u128) {
+        assert!(signer::address(account) == GOVERNANCE_ADMIN, "Only the governance admin can initialize the treasury");
+        assert!(!exists<Balance>(signer::address(account)), "Treasury already initialized");
+        move_to(account, Balance { value: initial_balance });
+    }
+
+    public fun deposit(account: &signer, amount: u128) {
+        assert!(amount > 0, "Deposit amount must be positive");
+        // Logic to handle deposits to the treasury account
+        let treasury_address = signer::address(account); // Assuming treasury has its own address
+        if (exists<Balance>(treasury_address)) {
+            let balance = borrow_global_mut<Balance>(treasury_address);
+            balance.value = balance.value + amount;
+        } else {
+            move_to(account, Balance { value: amount });
+        }
+    }
+
+    public fun submit_withdrawal_proposal(proposer: &signer, proposal_id: u64, amount: u128) {
+        assert!(amount > 0, "Withdrawal amount must be positive");
+        // Logic to store the withdrawal proposal
+        // ...
+    }
+
+    public fun approve_withdrawal(approver: &signer, proposal_id: u64, amount: u128) {
+        assert!(amount > 0, "Approval amount must be positive");
+        // Logic to record approval
+        // ...
+    }
+
+    public fun execute_withdrawal(account: &signer, proposal_id: u64, required_approvals: u8, recipient: address) {
+        assert!(signer::address(account) == TREASURY_MANAGER, "Only the treasury manager can execute withdrawals");
+        assert!(required_approvals > 0, "Required approvals must be greater than zero");
+        // Logic to count approvals and execute withdrawal
+        // ...
+    }
+    }
+
+5. contracts/proposal-handler.rs
+
+Code snippet
+
+    module ProposalHandler {
+        const GOVERNANCE_ADMIN: address = @0x123; // Replace with actual admin address
+
+    public fun handle_upgrade_contract(caller: &signer, proposal_id: u64, new_contract_address: address) {
+        assert!(signer::address(caller) == GOVERNANCE_ADMIN, "Only the governance admin can handle contract upgrades");
+        assert!(proposal_id > 0, "Invalid proposal ID");
+        assert!(new_contract_address != @0x0, "Invalid new contract address");
+        // Access necessary permissions and perform the contract upgrade
+        // ...
+        native fun log(message: string, proposal_id: u64, address: address);
+        log("Contract upgraded", proposal_id, new_contract_address);
+    }
+
+    public fun handle_modify_parameter(caller: &signer, proposal_id: u64, parameter_name: string, new_value: u64) {
+        assert!(signer::address(caller) == GOVERNANCE_ADMIN, "Only the governance admin can modify parameters");
+        assert!(proposal_id > 0, "Invalid proposal ID");
+        assert!(string::length(&parameter_name) > 0, "Parameter name cannot be empty");
+        // Access necessary permissions and modify the specified parameter
+        // ...
+        native fun log(message: string, proposal_id: u64, parameter_name: string, new_value: u64);
+        log("Parameter modified", proposal_id, parameter_name
