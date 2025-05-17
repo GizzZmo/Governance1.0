@@ -58,8 +58,7 @@ This is a comprehensive plan. Let me know if you'd like to start with a specific
 Analysis
 Here are the source files from the repository, organized by type:
 
-Move Files (.rs)
-
+# Move Files (.rs)
 contracts/governance.rs 
 contracts/delegation-staking.rs 
 contracts/treasury.rs 
@@ -68,12 +67,12 @@ tests/governance-tests.rs
 tests/staking-tests.rs 
 tests/treasury-tests.rs 
 scripts/governance-cli.rs 
-Shell Scripts (.sh) 
 
+# Shell Scripts (.sh) 
 scripts/deploy.sh 
 deploy.sh 
-Markdown Files (.md) 
 
+# Markdown Files (.md) 
 docs/use_cases.md 
 docs/README.md 
 docs/governance-specs.md 
@@ -81,15 +80,15 @@ docs/staking-mechanics.md
 README.md 
 SECURITY.md 
 CONTRIBUTING.md 
-YAML Files (.yml) 
 
+# YAML Files (.yml) 
 .github/workflows/ci-deploy.yml 
 .github/workflows/ci-cd.yml 
-TOML Files (.toml) 
 
+# TOML Files (.toml) 
 config/parameters.toml 
-Text Files (.txt) 
 
+# Text Files (.txt) 
 howto.txt 
 VisualAidsforGovernanceArchitecture.txt 
 
