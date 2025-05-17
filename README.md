@@ -6,7 +6,7 @@ Add DAO Integration
 Implement Treasury AI Audits
 Since these are substantial features, let's break them down into smaller, manageable tasks.
 
-1. Refine Validator Reputation Scoring
+# 1. Refine Validator Reputation Scoring
 
 Task 1.1: Analyze the existing hybrid_vote function in governance.rs to understand the current reputation weighting.
 Task 1.2: Design a more comprehensive reputation scoring system. Consider factors like:
@@ -17,7 +17,8 @@ Any evidence of malicious behavior.
 Task 1.3: Modify the delegation-staking.rs contract to store and update validator reputation scores based on the new design.
 Task 1.4: Update the hybrid_vote function in governance.rs to incorporate the new reputation scores from delegation-staking.rs when calculating voting weight.
 Task 1.5: Add tests in staking-tests.rs and governance-tests.rs to ensure the reputation scoring and voting weight calculations work correctly.
-2. Add DAO Integration
+
+# 2. Add DAO Integration
 
 Task 2.1: Design the structure for governance tokens. Determine the token's properties (e.g., name, symbol, total supply, divisibility).
 Task 2.2: Create a new Move contract (e.g., governance_token.rs) to manage the governance tokens. This contract should include functions for:
@@ -30,7 +31,8 @@ Require a minimum number of tokens to submit a proposal.
 Weight votes based on the number of tokens held.
 Task 2.4: Update the deploy.sh script to deploy the governance_token.rs contract.
 Task 2.5: Add tests in governance-tests.rs to verify the DAO integration, including token-weighted voting and proposal submission requirements.
-3. Implement Treasury AI Audits
+
+# 3. Implement Treasury AI Audits
 
 Task 3.1: Define the criteria for AI audits of funding proposals. This might include:
 Analyzing the requested funding amount.
