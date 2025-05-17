@@ -1,4 +1,236 @@
-# Governance 1.0
+# Governance 1.0Great! Based on your README, architecture, and code snippets, here’s a file structure and initial content for your Move-based governance project, following your modular approach and including verification checks.
+
+---
+
+```move name=contracts/governance.rs
+module Governance {
+    struct Proposal {
+        id: u64,
+        creator: address,
+        description: string,
+        proposal_type: u8,
+        votes_for: u128,
+        votes_against: u128,
+        veto_votes: u128,
+        quorum: u128,
+        executed: bool,
+    }
+
+    struct Voter {
+        address: address,
+        stake: u128,
+        delegate: option<address>,
+        reputation: u128,
+    }
+
+    const GOVERNANCE_ADMIN: address = @0x123; // Replace with actual admin address
+
+    public fun submit_proposal(creator: &signer, description: string, proposal_type: u8): u64 {
+        assert!(string::length(&description) > 0, "Proposal description cannot be empty");
+        assert!(proposal_type < 3, "Invalid proposal type");
+        let proposal_id = generate_id();
+        let quorum = determine_quorum(proposal_type);
+        let new_proposal = Proposal { id: proposal_id, creator: signer::address(creator), description, proposal_type, votes_for: 0, votes_against: 0, veto_votes: 0, quorum, executed: false };
+        move_to(creator, new_proposal);
+        return proposal_id;
+    }
+
+    public fun hybrid_vote(proposal: &mut Proposal, voter_address: address, votes: u128, support: bool, veto: bool) {
+        assert!(exists<Voter>(voter_address), "Voter not registered");
+        let voter = borrow_global<Voter>(voter_address);
+        assert!(voter.stake >= votes, "Insufficient stake to cast these many votes");
+        assert!(!proposal.executed, "Proposal has already been executed");
+
+        let effective_votes = sqrt(votes);
+        let reputation_weight = 100 + voter.reputation / 100;
+        let final_votes = effective_votes * reputation_weight / 100;
+
+        let voting_address = voter.delegate.unwrap_or(voter_address);
+
+        if veto && proposal.proposal_type == 2 {
+            proposal.veto_votes += final_votes;
+        } else if support {
+            proposal.votes_for += final_votes;
+        } else {
+            proposal.votes_against += final_votes;
+        }
+    }
+
+    public fun execute_proposal(account: &signer, proposal: &mut Proposal) {
+        assert!(signer::address(account) == GOVERNANCE_ADMIN, "Only the governance admin can execute proposals");
+        assert!(proposal.votes_for + proposal.votes_against >= proposal.quorum, "Quorum not met");
+        assert!(proposal.votes_for > proposal.votes_against, "Proposal rejected");
+        assert!(!proposal.executed, "Proposal has already been executed");
+        proposal.executed = true;
+    }
+
+    fun determine_quorum(proposal_type: u8) -> u128 {
+        assert!(proposal_type < 3, "Invalid proposal type");
+        match proposal_type {
+            0 => total_stake() * 10 / 100,
+            1 => total_stake() * 30 / 100,
+            2 => total_stake() * 50 / 100,
+            _ => abort("Invalid proposal type"),
+        }
+    }
+
+    fun sqrt(x: u128) -> u128 {
+        let mut guess = x / 2;
+        while guess * guess > x {
+            guess = (guess + x / guess) / 2;
+        }
+        guess
+    }
+
+    native fun generate_id(): u64;
+    native fun total_stake(): u128;
+}
+```
+
+---
+
+```move name=contracts/delegation-staking.rs
+module DelegationStaking {
+    struct Validator {
+        address: address,
+        stake: u128,
+        delegated_stake: u128,
+        reputation: u128,
+        last_heartbeat: u64,
+    }
+
+    struct Config has key {
+        min_stake: u64,
+    }
+
+    const GOVERNANCE_ADMIN: address = @0x123;
+
+    public fun initialize(account: &signer) {
+        assert!(signer::address(account) == GOVERNANCE_ADMIN, "Only the governance admin can initialize this module");
+        assert!(!exists<Config>(@0x0), "Module already initialized");
+        move_to(account, Config { min_stake: 1000 });
+    }
+
+    public fun delegate_stake(delegator: &signer, validator_address: address, amount: u64) {
+        assert!(exists<Config>(@0x0), "Module not initialized");
+        assert!(amount >= borrow_global<Config>(@0x0).min_stake, "Staking amount below minimum");
+        assert!(exists<Validator>(validator_address), "Validator address is not valid");
+        assert!(signer::address(delegator) != validator_address, "Cannot delegate to yourself");
+        // ... (stake logic)
+    }
+
+    public fun update_reputation(caller: &signer, validator_address: address, reputation_change: i64) {
+        assert!(signer::address(caller) == GOVERNANCE_ADMIN, "Only the governance admin can update reputation");
+        assert!(exists<Validator>(validator_address), "Validator not found");
+        let validator = borrow_global_mut<Validator>(validator_address);
+        validator.reputation = (validator.reputation as i64 + reputation_change) as u128;
+    }
+
+    public fun record_heartbeat(validator_signer: &signer, validator_address: address) {
+        assert!(signer::address(validator_signer) == validator_address, "Only the validator can record their own heartbeat");
+        assert!(exists<Validator>(validator_address), "Validator not found");
+        let validator = borrow_global_mut<Validator>(validator_address);
+        validator.last_heartbeat = current_time();
+    }
+
+    native fun current_time(): u64;
+}
+```
+
+---
+
+```move name=contracts/treasury.rs
+module Treasury {
+    struct Balance {
+        value: u128,
+    }
+
+    struct Approval {
+        proposal_id: u64,
+        amount: u128,
+        approver: address,
+    }
+
+    const GOVERNANCE_ADMIN: address = @0x123;
+    const TREASURY_MANAGER: address = @0x456;
+
+    public fun initialize(account: &signer, initial_balance: u128) {
+        assert!(signer::address(account) == GOVERNANCE_ADMIN, "Only the governance admin can initialize the treasury");
+        assert!(!exists<Balance>(signer::address(account)), "Treasury already initialized");
+        move_to(account, Balance { value: initial_balance });
+    }
+
+    public fun deposit(account: &signer, amount: u128) {
+        assert!(amount > 0, "Deposit amount must be positive");
+        let treasury_address = signer::address(account);
+        if (exists<Balance>(treasury_address)) {
+            let balance = borrow_global_mut<Balance>(treasury_address);
+            balance.value = balance.value + amount;
+        } else {
+            move_to(account, Balance { value: amount });
+        }
+    }
+
+    public fun submit_withdrawal_proposal(proposer: &signer, proposal_id: u64, amount: u128) {
+        assert!(amount > 0, "Withdrawal amount must be positive");
+        // ... (logic to store withdrawal proposal)
+    }
+
+    public fun approve_withdrawal(approver: &signer, proposal_id: u64, amount: u128) {
+        assert!(amount > 0, "Approval amount must be positive");
+        // ... (logic to record approval)
+    }
+
+    public fun execute_withdrawal(account: &signer, proposal_id: u64, required_approvals: u8, recipient: address) {
+        assert!(signer::address(account) == TREASURY_MANAGER, "Only the treasury manager can execute withdrawals");
+        assert!(required_approvals > 0, "Required approvals must be greater than zero");
+        // ... (logic to count approvals and execute withdrawal)
+    }
+}
+```
+
+---
+
+```move name=contracts/proposal-handler.rs
+module ProposalHandler {
+    const GOVERNANCE_ADMIN: address = @0x123;
+
+    public fun handle_upgrade_contract(caller: &signer, proposal_id: u64, new_contract_address: address) {
+        assert!(signer::address(caller) == GOVERNANCE_ADMIN, "Only the governance admin can handle contract upgrades");
+        assert!(proposal_id > 0, "Invalid proposal ID");
+        assert!(new_contract_address != @0x0, "Invalid new contract address");
+        // ... (upgrade logic)
+        native fun log(message: string, proposal_id: u64, address: address);
+        log("Contract upgraded", proposal_id, new_contract_address);
+    }
+
+    public fun handle_modify_parameter(caller: &signer, proposal_id: u64, parameter_name: string, new_value: u64) {
+        assert!(signer::address(caller) == GOVERNANCE_ADMIN, "Only the governance admin can modify parameters");
+        assert!(proposal_id > 0, "Invalid proposal ID");
+        assert!(string::length(&parameter_name) > 0, "Parameter name cannot be empty");
+        // ... (modify logic)
+        native fun log(message: string, proposal_id: u64, parameter_name: string, new_value: u64);
+        log("Parameter modified", proposal_id, parameter_name, new_value);
+    }
+}
+```
+
+---
+
+```move name=contracts/governance_token.rs
+module governance_token {
+    // ... Full token logic as described in your plan, with verification and Move idioms ...
+    // For brevity, see your previous code block or request a full expanded version.
+}
+```
+
+---
+
+Test files, shell scripts, documentation, and CI files can be generated with similar structure and stubbed tests. If you'd like the full set, or a specific one (e.g., governance-tests.rs, deploy.sh, docs/README.md), just name it!
+
+Let me know which file you want next or request the entire set.
+
+
 This project, Governance 1.0, demonstrates a thoughtful and ambitious approach to building decentralized governance infrastructure using Move smart contracts. Here’s a high-level assessment based on the README and included source code outlines:
 
 # Strengths
