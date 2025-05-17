@@ -1,0 +1,20 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Move CLI
+        run: |
+          curl -L https://github.com/move-language/move/releases/download/v1.0.0/move-x86_64-unknown-linux-gnu.tar.gz | tar xz
+          sudo mv move /usr/local/bin/
+      - name: Run Move tests
+        run: move test ./tests
