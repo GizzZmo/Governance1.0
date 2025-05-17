@@ -172,7 +172,7 @@ VisualAidsforGovernanceArchitecture.txt
 
     native fun generate_id(): u64;
     native fun total_stake(): u128;
-}
+    }
 
     module DelegationStaking {
     struct Validator {
@@ -217,7 +217,7 @@ VisualAidsforGovernanceArchitecture.txt
     }
 
     native fun current_time(): u64;
-}
+    }
 
     module Treasury {
     struct Balance {
@@ -273,7 +273,7 @@ VisualAidsforGovernanceArchitecture.txt
         balance.value = balance.value - amount;
         // Optionally, mark the proposal as executed
     }
-}
+    }
     module ProposalHandler {
     // This module would contain logic to handle the execution of different proposal types.
     // For example, upgrading contracts, modifying parameters, etc.
@@ -292,7 +292,9 @@ VisualAidsforGovernanceArchitecture.txt
 
     native fun log(message: string, proposal_id: u64, address: address);
     native fun log(message: string, proposal_id: u64, parameter_name: string, new_value: u64);
-}
+    }
+
+    
 # [test_only]
     module GovernanceTests {
     use std::signer;
@@ -371,9 +373,10 @@ VisualAidsforGovernanceArchitecture.txt
     native fun total_stake(): u128 {
         return 10000;
     }
-}
+    }
 
 # [test_only]
+
     module StakingTests {
     use std::signer;
     use sui::object::{Self, UID};
@@ -448,7 +451,8 @@ VisualAidsforGovernanceArchitecture.txt
 }
 
 # [test_only]
-# module TreasuryTests {
+
+    module TreasuryTests {
     use std::signer;
     use sui::object::{Self, UID};
     use sui::tx_context::{Self, TxContext};
@@ -515,15 +519,15 @@ VisualAidsforGovernanceArchitecture.txt
 
 # Implementation verification of endpoints
 
-Okay, let's implement verification of endpoints. To do this effectively in our Move-based governance system, we need to consider where and how external entities (users, other contracts, etc.) interact with our governance logic.
+*Okay, let's implement verification of endpoints. To do this effectively in our Move-based governance system, we need to consider where and how external entities (users, other contracts, etc.) interact with our governance logic.
 
-Here's a potential approach, focusing on the entry points of our contracts:
+**Here's a potential approach, focusing on the entry points of our contracts:
 
 1. Identify Entry Points:
 
 The primary entry points in our current contracts are the public functions:
 
-Governance module:
+# Governance module:
     submit_proposal
     hybrid_vote
     execute_proposal
@@ -533,22 +537,23 @@ Governance module:
     update_reputation
     record_heartbeat
 
-Treasury module:
+# Treasury module:
     initialize
     deposit
     submit_withdrawal_proposal
     approve_withdrawal
     execute_withdrawal
 
-2. Define Verification Needs:
+# 2. Define Verification Needs:
 
-For each entry point, we should consider what needs to be verified to ensure the integrity and security of our governance system. This might include:
+    For each entry point, we should consider what needs to be verified to ensure the integrity and security of our governance system. This might include:
+    
+    Authentication: Is the caller who they claim to be? (Move's signer provides this at the transaction level).
+    Authorization: Does the caller have the necessary permissions to perform this action?
+    Data Validation: Is the input data valid and within expected ranges?
+    State Invariants: Does the action maintain the expected state of the contracts?
 
-Authentication: Is the caller who they claim to be? (Move's signer provides this at the transaction level).
-Authorization: Does the caller have the necessary permissions to perform this action?
-Data Validation: Is the input data valid and within expected ranges?
-State Invariants: Does the action maintain the expected state of the contracts?
-3. Implement Verification Logic within Move Contracts:
+# 3. Implement Verification Logic within Move Contracts:
 
 We will add checks at the beginning of our public functions to enforce these verification rules using Move's assert! macro.
 
@@ -593,7 +598,7 @@ Here's how we can enhance some of the existing functions with verification:
 
     // Example constant for a governance admin address
     const GOVERNANCE_ADMIN: address = @0x123; // Replace with the actual admin address
-}
+    }
 
 
 # DelegationStaking Module (delegation-staking.rs):
@@ -632,7 +637,7 @@ Here's how we can enhance some of the existing functions with verification:
 
     // ... (struct definitions and constants)
     const GOVERNANCE_ADMIN: address = @0x123; // Replace with the actual admin address
-}
+    }
 
 
 # Treasury Module (treasury.rs):
@@ -680,7 +685,7 @@ Here's how we can enhance some of the existing functions with verification:
     // ... (other functions and potential helper functions like 'is_treasury_approver')
     const GOVERNANCE_ADMIN: address = @0x123; // Replace with the actual admin address
     const TREASURY_MANAGER: address = @0x456; // Replace with the actual treasury manager address
-}
+    }
 
 # 4. Testing the Verification:
 
