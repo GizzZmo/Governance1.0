@@ -296,6 +296,7 @@
 
     
 # [test_only]
+
     module GovernanceTests {
     use std::signer;
     use sui::object::{Self, UID};
