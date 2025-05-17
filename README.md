@@ -271,7 +271,7 @@ Sources and related content
         // Optionally, mark the proposal as executed
     }
 }
-module ProposalHandler {
+# module ProposalHandler {
     // This module would contain logic to handle the execution of different proposal types.
     // For example, upgrading contracts, modifying parameters, etc.
 
@@ -318,7 +318,7 @@ module GovernanceTests {
         assert!(!proposal.executed, "Proposal should not be executed");
     }
 
-    #[test]
+    # [test]
     fun test_hybrid_vote() {
         let voter_address = signer::address(2);
         let voter = Voter {
@@ -344,7 +344,7 @@ module GovernanceTests {
         assert!(proposal.votes_for > 0, "Votes for should be greater than 0");
     }
 
-    #[test]
+    # [test]
     fun test_execute_proposal() {
         let creator = signer::test_signer(1);
         let description = string::utf8(b"Test proposal");
@@ -369,17 +369,16 @@ module GovernanceTests {
         return 10000;
     }
 }
-Code snippet
 
-#[test_only]
-module StakingTests {
+# [test_only]
+# module StakingTests {
     use std::signer;
     use sui::object::{Self, UID};
     use sui::tx_context::{Self, TxContext};
 
     use super::*;
 
-    #[test]
+    # [test]
     fun test_initialize() {
         let admin = signer::test_signer(1);
         DelegationStaking::initialize(&admin);
@@ -388,7 +387,7 @@ module StakingTests {
         assert!(config.min_stake == 1000, "Minimum stake should be 1000");
     }
 
-    #[test]
+    # [test]
     fun test_delegate_stake() {
         let admin = signer::test_signer(1);
         DelegationStaking::initialize(&admin);
@@ -403,7 +402,7 @@ module StakingTests {
         // assert!(/* check delegator stake and validator delegated stake */, "Stake not delegated");
     }
 
-    #[test]
+    # [test]
     fun test_update_reputation() {
         let validator_address = signer::address(&signer::test_signer(1));
         move_to(&signer::test_signer(1), Validator {
@@ -423,7 +422,7 @@ module StakingTests {
         assert!(updated_validator.reputation == 90, "Reputation not updated correctly with negative change");
     }
 
-    #[test]
+    # [test]
     fun test_record_heartbeat() {
         let validator_address = signer::address(&signer::test_signer(1));
         move_to(&signer::test_signer(1), Validator {
@@ -444,10 +443,9 @@ module StakingTests {
         return 100;
     }
 }
-Code snippet
 
-#[test_only]
-module TreasuryTests {
+# [test_only]
+# module TreasuryTests {
     use std::signer;
     use sui::object::{Self, UID};
     use sui::tx_context::{Self, TxContext};
@@ -512,10 +510,8 @@ module TreasuryTests {
 
 
 
-implement verification of endpoints
+# Implementation verification of endpoints
 
-
-Coding partner
 Okay, let's implement verification of endpoints. To do this effectively in our Move-based governance system, we need to consider where and how external entities (users, other contracts, etc.) interact with our governance logic.
 
 Here's a potential approach, focusing on the entry points of our contracts:
